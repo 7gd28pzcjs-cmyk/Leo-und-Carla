@@ -1,7 +1,120 @@
-{
-  "content": "<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Leo und Carla - Unsere Erinnerungen</title>\n    <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n    <div id=\"loginScreen\" class=\"login-container\">\n        <div class=\"login-box\">\n            <div class=\"login-header\">\n                <h1>💑 Leo & Carla</h1>\n                <p class=\"login-subtitle\">Unsere privaten Erinnerungen</p>\n            </div>\n            <form id=\"loginForm\" class=\"login-form\">\n                <div class=\"input-group\">\n                    <input type=\"password\" id=\"passwordInput\" placeholder=\"Passwort eingeben\" class=\"password-input\" required>\n                    <span class=\"input-icon\">🔒</span>\n                </div>\n                <button type=\"submit\" class=\"login-button\"><span>Öffnen</span><span class=\"button-icon\">→</span></button>\n                <div id=\"loginError\" class=\"login-error\"></div>\n            </form>\n            <div class=\"login-footer\"><p>🔐 Diese Seite ist passwortgeschützt</p></div>\n        </div>\n    </div>\n\n    <div id=\"mainContent\" class=\"main-content\" style=\"display: none;\">\n        <header class=\"header\">\n            <div class=\"header-content\">\n                <h1 class=\"site-title\">💑 Leo & Carla</h1>\n                <button id=\"logoutBtn\" class=\"logout-button\"><span>Abmelden</span><span class=\"logout-icon\">🚪</span></button>\n            </div>\n        </header>\n\n        <main class=\"container\">\n            <section class=\"section text-section\">\n                <div class=\"section-header\">\n                    <h2>📖 Unsere Geschichte</h2>\n                    <button id=\"editTextBtn\" class=\"edit-button\">Bearbeiten</button>\n                </div>\n                <div id=\"textDisplay\" class=\"text-display\">\n                    <h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>\n                    <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente festhalten.</p>\n                </div>\n                <form id=\"textEditForm\" class=\"text-edit-form\" style=\"display: none;\">\n                    <textarea id=\"textInput\" class=\"text-input\" placeholder=\"Erzählen Sie unsere Geschichte...\" rows=\"10\"></textarea>\n                    <div class=\"button-group\">\n                        <button type=\"submit\" class=\"save-button\">Speichern</button>\n                        <button type=\"button\" id=\"cancelTextBtn\" class=\"cancel-button\">Abbrechen</button>\n                    </div>\n                </form>\n            </section>\n\n            <section class=\"section images-section\">\n                <div class=\"section-header\">\n                    <h2>🎬 Unsere Erinnerungen</h2>\n                    <div style=\"display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;\">\n                        <button id=\"addMediaBtn\" class=\"edit-button\">📱 Hochladen</button>\n                        <span class=\"storage-info\" id=\"storageInfo\">📦 Geladen: 0</span>\n                    </div>\n                </div>\n                \n                <div id=\"galleryContainer\" class=\"gallery\"></div>\n\n                <div id=\"uploadArea\" class=\"upload-area-hidden\" style=\"display: none;\">\n                    <input type=\"file\" id=\"mediaFileInput\" accept=\"image/*,video/*\" multiple style=\"display: none;\">\n                    <div class=\"upload-container\">\n                        <p class=\"upload-hint\">📸 🎥 Beliebig viele Bilder & Videos</p>\n                        <button type=\"button\" id=\"selectFilesBtn\" class=\"upload-file-btn\">Bilder & Videos auswählen</button>\n                        <button type=\"button\" id=\"cancelUploadBtn\" class=\"cancel-button\">Abbrechen</button>\n                        <div id=\"previewContainer\" class=\"preview-container\"></div>\n                        <div id=\"uploadProgress\" class=\"upload-progress\" style=\"display: none;\">\n                            <p id=\"progressText\">Laden...</p>\n                            <div class=\"progress-bar\">\n                                <div id=\"progressFill\" class=\"progress-fill\"></div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n            </section>\n\n            <section class=\"section notes-section\">\n                <div class=\"section-header\">\n                    <h2>💝 Besondere Momente</h2>\n                    <button id=\"addNoteBtn\" class=\"edit-button\">+ Moment</button>\n                </div>\n                <div id=\"notesContainer\" class=\"notes-container\"></div>\n                <form id=\"noteForm\" class=\"note-form\" style=\"display: none;\">\n                    <input type=\"text\" id=\"noteTitleInput\" placeholder=\"Titel\" class=\"note-title-input\" required>\n                    <textarea id=\"noteContentInput\" class=\"note-content-input\" placeholder=\"Beschreibung...\" rows=\"5\" required></textarea>\n                    <div class=\"button-group\">\n                        <button type=\"submit\" class=\"save-button\">Speichern</button>\n                        <button type=\"button\" id=\"cancelNoteBtn\" class=\"cancel-button\">Abbrechen</button>\n                    </div>\n                </form>\n            </section>\n        </main>\n\n        <footer class=\"footer\">\n            <p>&copy; 2024 Leo & Carla</p>\n        </footer>\n    </div>\n\n    <!-- LIGHTBOX / VERGRÖSSERUNG -->\n    <div id=\"lightbox\" class=\"lightbox\" style=\"display: none;\">\n        <div class=\"lightbox-container\">\n            <button id=\"closeLightbox\" class=\"lightbox-close\">✕</button>\n            <button id=\"prevMedia\" class=\"lightbox-nav lightbox-prev\">❮</button>\n            <div id=\"lightboxContent\" class=\"lightbox-content\"></div>\n            <button id=\"nextMedia\" class=\"lightbox-nav lightbox-next\">❯</button>\n            <div class=\"lightbox-counter\">\n                <span id=\"currentIndex\">1</span> / <span id=\"totalCount\">1</span>\n            </div>\n        </div>\n    </div>\n\n    <script src=\"script.js\"></script>\n</body>\n</html>\n",
-  "message": "Update HTML with lightbox for image viewing and swiping",
-  "owner": "7gd28pzcjs-cmyk",
-  "path": "index.html",
-  "repo": "private-website"
-}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leo und Carla - Unsere Erinnerungen</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>💑 Leo & Carla</h1>
+                <p class="login-subtitle">Unsere privaten Erinnerungen</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <input type="password" id="passwordInput" placeholder="Passwort eingeben" class="password-input" required>
+                    <span class="input-icon">🔒</span>
+                </div>
+                <button type="submit" class="login-button"><span>Öffnen</span><span class="button-icon">→</span></button>
+                <div id="loginError" class="login-error"></div>
+            </form>
+            <div class="login-footer"><p>🔐 Diese Seite ist passwortgeschützt</p></div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="main-content" style="display: none;">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="site-title">💑 Leo & Carla</h1>
+                <button id="logoutBtn" class="logout-button"><span>Abmelden</span><span class="logout-icon">🚪</span></button>
+            </div>
+        </header>
+
+        <main class="container">
+            <section class="section text-section">
+                <div class="section-header">
+                    <h2>📖 Unsere Geschichte</h2>
+                    <button id="editTextBtn" class="edit-button">Bearbeiten</button>
+                </div>
+                <div id="textDisplay" class="text-display">
+                    <h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
+                    <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente festhalten.</p>
+                </div>
+                <form id="textEditForm" class="text-edit-form" style="display: none;">
+                    <textarea id="textInput" class="text-input" placeholder="Erzählen Sie unsere Geschichte..." rows="10"></textarea>
+                    <div class="button-group">
+                        <button type="submit" class="save-button">Speichern</button>
+                        <button type="button" id="cancelTextBtn" class="cancel-button">Abbrechen</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="section images-section">
+                <div class="section-header">
+                    <h2>🎬 Unsere Erinnerungen</h2>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                        <button id="addMediaBtn" class="edit-button">📱 Hochladen</button>
+                        <span class="storage-info" id="storageInfo">📦 Geladen: 0</span>
+                    </div>
+                </div>
+                
+                <div id="galleryContainer" class="gallery"></div>
+
+                <div id="uploadArea" class="upload-area-hidden" style="display: none;">
+                    <input type="file" id="mediaFileInput" accept="image/*,video/*" multiple style="display: none;">
+                    <div class="upload-container">
+                        <p class="upload-hint">📸 🎥 Beliebig viele Bilder & Videos</p>
+                        <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder & Videos auswählen</button>
+                        <button type="button" id="cancelUploadBtn" class="cancel-button">Abbrechen</button>
+                        <div id="previewContainer" class="preview-container"></div>
+                        <div id="uploadProgress" class="upload-progress" style="display: none;">
+                            <p id="progressText">Laden...</p>
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section notes-section">
+                <div class="section-header">
+                    <h2>💝 Besondere Momente</h2>
+                    <button id="addNoteBtn" class="edit-button">+ Moment</button>
+                </div>
+                <div id="notesContainer" class="notes-container"></div>
+                <form id="noteForm" class="note-form" style="display: none;">
+                    <input type="text" id="noteTitleInput" placeholder="Titel" class="note-title-input" required>
+                    <textarea id="noteContentInput" class="note-content-input" placeholder="Beschreibung..." rows="5" required></textarea>
+                    <div class="button-group">
+                        <button type="submit" class="save-button">Speichern</button>
+                        <button type="button" id="cancelNoteBtn" class="cancel-button">Abbrechen</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Leo & Carla</p>
+        </footer>
+    </div>
+
+    <!-- LIGHTBOX / VERGRÖSSERUNG -->
+    <div id="lightbox" class="lightbox" style="display: none;">
+        <div class="lightbox-container">
+            <button id="closeLightbox" class="lightbox-close">✕</button>
+            <button id="prevMedia" class="lightbox-nav lightbox-prev">❮</button>
+            <div id="lightboxContent" class="lightbox-content"></div>
+            <button id="nextMedia" class="lightbox-nav lightbox-next">❯</button>
+            <div class="lightbox-counter">
+                <span id="currentIndex">1</span> / <span id="totalCount">1</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
