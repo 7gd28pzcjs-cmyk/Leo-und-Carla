@@ -14,10 +14,10 @@ const textEditForm = document.getElementById('textEditForm');
 const textInput = document.getElementById('textInput');
 const cancelTextBtn = document.getElementById('cancelTextBtn');
 
-const addImageBtn = document.getElementById('addImageBtn');
+const addMediaBtn = document.getElementById('addMediaBtn');
 const galleryContainer = document.getElementById('galleryContainer');
 const uploadArea = document.getElementById('uploadArea');
-const imageFileInput = document.getElementById('imageFileInput');
+const mediaFileInput = document.getElementById('mediaFileInput');
 const selectFilesBtn = document.getElementById('selectFilesBtn');
 const cancelUploadBtn = document.getElementById('cancelUploadBtn');
 const previewContainer = document.getElementById('previewContainer');
@@ -45,10 +45,10 @@ class DataManager {
             text: `<h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
 <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente, gemeinsamen Abenteuer und wertvollen Erinnerungen festhalten können.</p>
 <p>Hier können wir unsere Geschichte erzählen - die Momente, die uns verbinden, die Erlebnisse, die wir teilen, und die Liebe, die wir füreinander haben.</p>`,
-            images: [
-                { url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop', title: 'Erinnerung 1' },
-                { url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop', title: 'Erinnerung 2' },
-                { url: 'https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop', title: 'Erinnerung 3' }
+            media: [
+                { type: 'image', data: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop', title: 'Erinnerung 1' },
+                { type: 'image', data: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop', title: 'Erinnerung 2' },
+                { type: 'image', data: 'https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop', title: 'Erinnerung 3' }
             ],
             notes: [
                 { title: 'Unser erstes Treffen', content: 'Der Tag, an dem alles begann...' }
@@ -62,10 +62,10 @@ class DataManager {
 
     static getText() { return this.getData().text; }
     static setText(text) { const data = this.getData(); data.text = text; this.saveData(data); }
-    static getImages() { return this.getData().images; }
-    static addImage(url, title) { const data = this.getData(); data.images.push({ url, title }); this.saveData(data); }
-    static addImages(images) { const data = this.getData(); data.images.push(...images); this.saveData(data); }
-    static deleteImage(index) { const data = this.getData(); data.images.splice(index, 1); this.saveData(data); }
+    static getMedia() { return this.getData().media; }
+    static addMedia(mediaItem) { const data = this.getData(); data.media.push(mediaItem); this.saveData(data); }
+    static addMultipleMedia(mediaItems) { const data = this.getData(); data.media.push(...mediaItems); this.saveData(data); }
+    static deleteMedia(index) { const data = this.getData(); data.media.splice(index, 1); this.saveData(data); }
     static getNotes() { return this.getData().notes; }
     static addNote(title, content) { const data = this.getData(); data.notes.push({ title, content }); this.saveData(data); }
     static updateNote(index, title, content) { const data = this.getData(); data.notes[index] = { title, content }; this.saveData(data); }
@@ -123,35 +123,60 @@ textEditForm.addEventListener('submit', (e) => {
     }
 });
 
+function isVideoFile(file) {
+    return file.type.startsWith('video/');
+}
+
+function isImageFile(file) {
+    return file.type.startsWith('image/');
+}
+
 function renderGallery() {
-    const images = DataManager.getImages();
+    const mediaItems = DataManager.getMedia();
     galleryContainer.innerHTML = '';
-    images.forEach((image, index) => {
+    
+    mediaItems.forEach((media, index) => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
-        item.innerHTML = `
-            <img src="${image.url}" alt="${image.title}" onerror="this.src='https://via.placeholder.com/500?text=Fehler'">
-            <div class="image-info">
-                <p>${image.title}</p>
-                <button class="delete-image-btn" data-index="${index}" type="button">🗑️</button>
-            </div>
-        `;
+        
+        if (media.type === 'video') {
+            item.innerHTML = `
+                <video controls style="width: 100%; height: 180px; object-fit: cover; background: #000;">
+                    <source src="${media.data}" type="video/mp4">
+                    Ihr Browser unterstützt das Video-Tag nicht.
+                </video>
+                <div class="video-badge">🎥 VIDEO</div>
+                <div class="image-info">
+                    <p>${media.title}</p>
+                    <button class="delete-media-btn" data-index="${index}" type="button">🗑️</button>
+                </div>
+            `;
+        } else {
+            item.innerHTML = `
+                <img src="${media.data}" alt="${media.title}" onerror="this.src='https://via.placeholder.com/500?text=Fehler'">
+                <div class="image-info">
+                    <p>${media.title}</p>
+                    <button class="delete-media-btn" data-index="${index}" type="button">🗑️</button>
+                </div>
+            `;
+        }
+        
         galleryContainer.appendChild(item);
     });
     
-    document.querySelectorAll('.delete-image-btn').forEach(btn => {
+    document.querySelectorAll('.delete-media-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (confirm('Dieses Bild wirklich löschen?')) {
-                DataManager.deleteImage(parseInt(btn.dataset.index));
+            if (confirm('Dieses Element wirklich löschen?')) {
+                DataManager.deleteMedia(parseInt(btn.dataset.index));
                 renderGallery();
             }
         });
     });
 }
 
-addImageBtn.addEventListener('click', () => {
+addMediaBtn.addEventListener('click', () => {
     uploadArea.style.display = 'block';
     selectedFiles = [];
     previewContainer.innerHTML = '';
@@ -159,19 +184,19 @@ addImageBtn.addEventListener('click', () => {
 });
 
 selectFilesBtn.addEventListener('click', () => {
-    imageFileInput.click();
+    mediaFileInput.click();
 });
 
 cancelUploadBtn.addEventListener('click', () => {
     uploadArea.style.display = 'none';
-    imageFileInput.value = '';
+    mediaFileInput.value = '';
     selectedFiles = [];
     previewContainer.innerHTML = '';
     progressFill.style.width = '0%';
     uploadProgress.style.display = 'none';
 });
 
-imageFileInput.addEventListener('change', (e) => {
+mediaFileInput.addEventListener('change', (e) => {
     selectedFiles = Array.from(e.target.files);
     displayPreviews();
 });
@@ -183,10 +208,23 @@ function displayPreviews() {
         reader.onload = (e) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
-            div.innerHTML = `
-                <img src="${e.target.result}" alt="Preview">
-                <button class="remove-preview" type="button" data-index="${index}">✕</button>
-            `;
+            
+            if (isVideoFile(file)) {
+                div.innerHTML = `
+                    <video style="width: 100%; height: 100%; object-fit: cover;">
+                        <source src="${e.target.result}" type="${file.type}">
+                    </video>
+                    <div class="preview-video-badge">🎥</div>
+                    <div class="preview-play">▶</div>
+                    <button class="remove-preview" type="button" data-index="${index}">✕</button>
+                `;
+            } else {
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <button class="remove-preview" type="button" data-index="${index}">✕</button>
+                `;
+            }
+            
             previewContainer.appendChild(div);
         };
         reader.readAsDataURL(file);
@@ -204,21 +242,23 @@ function displayPreviews() {
     }, 100);
 }
 
-async function uploadImages() {
+async function uploadMedia() {
     if (selectedFiles.length === 0) {
-        alert('Bitte wählen Sie mindestens ein Bild aus.');
+        alert('Bitte wählen Sie mindestens ein Bild oder Video aus.');
         return;
     }
 
     uploadProgress.style.display = 'block';
-    const imagesToAdd = [];
+    const mediaToAdd = [];
     let uploaded = 0;
 
     for (const file of selectedFiles) {
         const reader = new FileReader();
         reader.onload = () => {
-            imagesToAdd.push({
-                url: reader.result,
+            const mediaType = isVideoFile(file) ? 'video' : 'image';
+            mediaToAdd.push({
+                type: mediaType,
+                data: reader.result,
                 title: file.name.replace(/\.[^/.]+$/, '')
             });
             uploaded++;
@@ -227,15 +267,20 @@ async function uploadImages() {
             progressText.textContent = `Laden... ${percent}%`;
 
             if (uploaded === selectedFiles.length) {
-                DataManager.addImages(imagesToAdd);
+                DataManager.addMultipleMedia(mediaToAdd);
                 renderGallery();
                 uploadArea.style.display = 'none';
-                imageFileInput.value = '';
+                mediaFileInput.value = '';
                 selectedFiles = [];
                 previewContainer.innerHTML = '';
                 progressFill.style.width = '0%';
                 uploadProgress.style.display = 'none';
-                alert(`✅ ${imagesToAdd.length} Bild(er) erfolgreich hinzugefügt!`);
+                const imageCount = mediaToAdd.filter(m => m.type === 'image').length;
+                const videoCount = mediaToAdd.filter(m => m.type === 'video').length;
+                let msg = '✅ Erfolgreich hochgeladen: ';
+                if (imageCount > 0) msg += `${imageCount} Bild(er) `;
+                if (videoCount > 0) msg += `${videoCount} Video(s)`;
+                alert(msg);
             }
         };
         reader.readAsDataURL(file);
@@ -244,40 +289,20 @@ async function uploadImages() {
 
 previewContainer.addEventListener('dblclick', (e) => {
     if (selectedFiles.length > 0) {
-        uploadImages();
-    }
-});
-
-previewContainer.addEventListener('touchend', (e) => {
-    if (e.target.closest('.remove-preview') === null && selectedFiles.length > 0) {
-        const touch = e.changedTouches[e.changedTouches.length - 1];
-        const endTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (endTarget.closest('.preview-item') && selectedFiles.length > 0) {
-            uploadImages();
-        }
+        uploadMedia();
     }
 });
 
 const uploadButton = document.createElement('button');
 uploadButton.type = 'button';
 uploadButton.className = 'save-button';
-uploadButton.textContent = '✅ Bilder hochladen';
+uploadButton.textContent = '✅ Bilder & Videos hochladen';
 uploadButton.style.width = '100%';
 uploadButton.style.marginTop = '1rem';
-uploadButton.addEventListener('click', uploadImages);
+uploadButton.addEventListener('click', uploadMedia);
 
-previewContainer.addEventListener('DOMNodeInserted', () => {
-    setTimeout(() => {
-        if (!previewContainer.nextElementSibling || !previewContainer.nextElementSibling.classList.contains('save-button')) {
-            previewContainer.parentNode.insertBefore(uploadButton.cloneNode(true), previewContainer.nextSibling);
-            previewContainer.parentNode.querySelector('.save-button:not(.original)').addEventListener('click', uploadImages);
-        }
-    }, 100);
-});
-
-// Add upload button to upload area
 const uploadButtonClone = uploadButton.cloneNode(true);
-uploadButtonClone.addEventListener('click', uploadImages);
+uploadButtonClone.addEventListener('click', uploadMedia);
 uploadArea.querySelector('.upload-container').appendChild(uploadButtonClone);
 
 function renderNotes() {
@@ -376,4 +401,4 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-console.log('💑 Leo & Carla - Unsere Erinnerungen - Geladen! ✨');
+console.log('💑 Leo & Carla - Unsere Erinnerungen mit Videos! 🎬✨');
