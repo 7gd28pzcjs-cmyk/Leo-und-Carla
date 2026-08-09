@@ -28,7 +28,7 @@
     <div id="mainContent" class="main-content" style="display: none;">
         <header class="header">
             <div class="header-content">
-                <h1 class="site-title">💑 Leo & Carla - Unsere Erinnerungen</h1>
+                <h1 class="site-title">💑 Leo & Carla</h1>
                 <button id="logoutBtn" class="logout-button"><span>Abmelden</span><span class="logout-icon">🚪</span></button>
             </div>
         </header>
@@ -56,42 +56,50 @@
             <section class="section images-section">
                 <div class="section-header">
                     <h2>🖼️ Unsere Erinnerungen</h2>
-                    <div class="image-buttons">
-                        <button id="addImageBtn" class="edit-button">+ Bild hinzufügen</button>
-                        <button id="batchUploadBtn" class="edit-button" style="background: #f39c12;">📋 Batch-Upload</button>
-                    </div>
+                    <button id="addImageBtn" class="edit-button">📱 Bilder hochladen</button>
                 </div>
                 
                 <div id="galleryContainer" class="gallery">
-                    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Erinnerung 1"><div class="image-info"><p>Erinnerung 1</p><button class="delete-image-btn" data-index="0">🗑️</button></div></div>
-                    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Erinnerung 2"><div class="image-info"><p>Erinnerung 2</p><button class="delete-image-btn" data-index="1">🗑️</button></div></div>
-                    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Erinnerung 3"><div class="image-info"><p>Erinnerung 3</p><button class="delete-image-btn" data-index="2">🗑️</button></div></div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Erinnerung 1">
+                        <div class="image-info">
+                            <p>Erinnerung 1</p>
+                            <button class="delete-image-btn" data-index="0" type="button">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Erinnerung 2">
+                        <div class="image-info">
+                            <p>Erinnerung 2</p>
+                            <button class="delete-image-btn" data-index="1" type="button">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Erinnerung 3">
+                        <div class="image-info">
+                            <p>Erinnerung 3</p>
+                            <button class="delete-image-btn" data-index="2" type="button">🗑️</button>
+                        </div>
+                    </div>
                 </div>
 
-                <form id="imageUploadForm" class="image-upload-form" style="display: none;">
-                    <div class="upload-area">
-                        <input type="text" id="imageUrlInput" placeholder="Geben Sie die Bild-URL ein" class="url-input" required>
-                        <input type="text" id="imageTitleInput" placeholder="Bildtitel" class="title-input" required>
-                        <p class="upload-hint">Verwenden Sie URLs von kostenlosen Bildseiten wie Unsplash, Pexels oder Pixabay</p>
-                        <div class="button-group">
-                            <button type="submit" class="save-button">Hinzufügen</button>
-                            <button type="button" id="cancelImageBtn" class="cancel-button">Abbrechen</button>
+                <div id="uploadArea" class="upload-area-hidden" style="display: none;">
+                    <input type="file" id="imageFileInput" accept="image/*" multiple style="display: none;">
+                    <div class="upload-container">
+                        <div class="upload-hint-box">
+                            <p class="upload-hint">📸 Wähle Bilder von deinem Handy oder Computer</p>
+                            <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder auswählen</button>
+                            <button type="button" id="cancelUploadBtn" class="cancel-button">Abbrechen</button>
+                        </div>
+                        <div id="previewContainer" class="preview-container"></div>
+                        <div id="uploadProgress" class="upload-progress" style="display: none;">
+                            <p id="progressText">Laden...</p>
+                            <div class="progress-bar">
+                                <div id="progressFill" class="progress-fill"></div>
+                            </div>
                         </div>
                     </div>
-                </form>
-
-                <form id="batchUploadForm" class="batch-upload-form" style="display: none;">
-                    <div class="upload-area">
-                        <h3>📋 Batch-Upload (bis zu 300 Bilder)</h3>
-                        <p class="upload-hint">Format: Jede Zeile: URL|Titel (getrennt durch Pipe)</p>
-                        <textarea id="batchInput" class="batch-textarea" placeholder="https://example.com/bild1.jpg|Titel 1&#10;https://example.com/bild2.jpg|Titel 2&#10;https://example.com/bild3.jpg|Titel 3" rows="15"></textarea>
-                        <p class="upload-hint">Beispiel:<br>https://unsplash.com/photo1.jpg|Unser erstes Date<br>https://unsplash.com/photo2.jpg|Unser Abenteuer</p>
-                        <div class="button-group">
-                            <button type="submit" class="save-button">Alle hinzufügen</button>
-                            <button type="button" id="cancelBatchBtn" class="cancel-button">Abbrechen</button>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </section>
 
             <section class="section notes-section">
@@ -104,8 +112,8 @@
                         <h4>Unser erstes Treffen</h4>
                         <p>Der Tag, an dem alles begann...</p>
                         <div class="note-actions">
-                            <button class="note-edit-btn" data-index="0">✏️</button>
-                            <button class="note-delete-btn" data-index="0">🗑️</button>
+                            <button class="note-edit-btn" data-index="0" type="button">✏️</button>
+                            <button class="note-delete-btn" data-index="0" type="button">🗑️</button>
                         </div>
                     </div>
                 </div>
@@ -121,7 +129,7 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Leo & Carla - Unsere gemeinsamen Erinnerungen. Alle Inhalte sind privat und passwortgeschützt.</p>
+            <p>&copy; 2024 Leo & Carla - Unsere gemeinsamen Erinnerungen</p>
         </footer>
     </div>
 
