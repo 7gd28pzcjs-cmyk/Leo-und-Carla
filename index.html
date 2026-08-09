@@ -3,73 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Private Seite</title>
+    <title>Leo und Carla - Unsere Erinnerungen</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="login-container">
         <div class="login-box">
             <div class="login-header">
-                <h1>Private Seite</h1>
-                <p class="login-subtitle">Passwort erforderlich</p>
+                <h1>💑 Leo & Carla</h1>
+                <p class="login-subtitle">Unsere privaten Erinnerungen</p>
             </div>
             <form id="loginForm" class="login-form">
                 <div class="input-group">
-                    <input 
-                        type="password" 
-                        id="passwordInput" 
-                        placeholder="Passwort eingeben" 
-                        class="password-input"
-                        required
-                    >
+                    <input type="password" id="passwordInput" placeholder="Passwort eingeben" class="password-input" required>
                     <span class="input-icon">🔒</span>
                 </div>
-                <button type="submit" class="login-button">
-                    <span>Öffnen</span>
-                    <span class="button-icon">→</span>
-                </button>
+                <button type="submit" class="login-button"><span>Öffnen</span><span class="button-icon">→</span></button>
                 <div id="loginError" class="login-error"></div>
             </form>
-            <div class="login-footer">
-                <p>🔐 Diese Seite ist passwortgeschützt</p>
-            </div>
+            <div class="login-footer"><p>🔐 Diese Seite ist passwortgeschützt</p></div>
         </div>
     </div>
 
-    <!-- MAIN CONTENT (HIDDEN UNTIL LOGIN) -->
     <div id="mainContent" class="main-content" style="display: none;">
-        <!-- HEADER -->
         <header class="header">
             <div class="header-content">
-                <h1 class="site-title">Meine Private Seite</h1>
-                <button id="logoutBtn" class="logout-button">
-                    <span>Abmelden</span>
-                    <span class="logout-icon">🚪</span>
-                </button>
+                <h1 class="site-title">💑 Leo & Carla - Unsere Erinnerungen</h1>
+                <button id="logoutBtn" class="logout-button"><span>Abmelden</span><span class="logout-icon">🚪</span></button>
             </div>
         </header>
 
-        <!-- MAIN CONTAINER -->
         <main class="container">
-            <!-- TEXT SECTION -->
             <section class="section text-section">
                 <div class="section-header">
-                    <h2>📝 Mein Text</h2>
+                    <h2>📖 Unsere Geschichte</h2>
                     <button id="editTextBtn" class="edit-button">Bearbeiten</button>
                 </div>
                 <div id="textDisplay" class="text-display">
-                    <h3>Willkommen auf meiner privaten Seite!</h3>
-                    <p>Dies ist mein persönlicher Bereich, in dem ich meine Gedanken, Ideen und Erinnerungen festhalten kann. Hier können alle meine liebsten Momente, Inspirationen und wichtigen Notizen gespeichert werden.</p>
-                    <p>Die Seite ist vollständig passwortgeschützt und nur für mich zugänglich. Ich kann hier frei meine Texte schreiben, bearbeiten und personalisieren, wie es mir gefällt.</p>
+                    <h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
+                    <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente, gemeinsamen Abenteuer und wertvollen Erinnerungen festhalten können.</p>
+                    <p>Hier können wir unsere Geschichte erzählen - die Momente, die uns verbinden, die Erlebnisse, die wir teilen, und die Liebe, die wir füreinander haben.</p>
                 </div>
                 <form id="textEditForm" class="text-edit-form" style="display: none;">
-                    <textarea 
-                        id="textInput" 
-                        class="text-input" 
-                        placeholder="Geben Sie Ihren Text ein..."
-                        rows="8"
-                    ></textarea>
+                    <textarea id="textInput" class="text-input" placeholder="Erzählen Sie unsere Geschichte..." rows="10"></textarea>
                     <div class="button-group">
                         <button type="submit" class="save-button">Speichern</button>
                         <button type="button" id="cancelTextBtn" class="cancel-button">Abbrechen</button>
@@ -77,72 +53,56 @@
                 </form>
             </section>
 
-            <!-- IMAGES SECTION -->
             <section class="section images-section">
                 <div class="section-header">
-                    <h2>🖼️ Meine Bilder</h2>
-                    <button id="addImageBtn" class="edit-button">+ Bild hinzufügen</button>
+                    <h2>🖼️ Unsere Erinnerungen</h2>
+                    <div class="image-buttons">
+                        <button id="addImageBtn" class="edit-button">+ Bild hinzufügen</button>
+                        <button id="batchUploadBtn" class="edit-button" style="background: #f39c12;">📋 Batch-Upload</button>
+                    </div>
                 </div>
                 
-                <div class="gallery">
-                    <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Berglandschaft">
-                        <div class="image-info">
-                            <p>Berglandschaft</p>
-                            <button class="delete-image-btn" data-index="0">🗑️</button>
-                        </div>
-                    </div>
-                    <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Sonnenuntergang">
-                        <div class="image-info">
-                            <p>Sonnenuntergang</p>
-                            <button class="delete-image-btn" data-index="1">🗑️</button>
-                        </div>
-                    </div>
-                    <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Naturscene">
-                        <div class="image-info">
-                            <p>Naturszene</p>
-                            <button class="delete-image-btn" data-index="2">🗑️</button>
-                        </div>
-                    </div>
+                <div id="galleryContainer" class="gallery">
+                    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Erinnerung 1"><div class="image-info"><p>Erinnerung 1</p><button class="delete-image-btn" data-index="0">🗑️</button></div></div>
+                    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Erinnerung 2"><div class="image-info"><p>Erinnerung 2</p><button class="delete-image-btn" data-index="1">🗑️</button></div></div>
+                    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Erinnerung 3"><div class="image-info"><p>Erinnerung 3</p><button class="delete-image-btn" data-index="2">🗑️</button></div></div>
                 </div>
 
                 <form id="imageUploadForm" class="image-upload-form" style="display: none;">
                     <div class="upload-area">
-                        <input 
-                            type="text" 
-                            id="imageUrlInput" 
-                            placeholder="Geben Sie die Bild-URL ein" 
-                            class="url-input"
-                            required
-                        >
-                        <input 
-                            type="text" 
-                            id="imageTitleInput" 
-                            placeholder="Bildtitel (z.B. 'Mein Urlaub')" 
-                            class="title-input"
-                            required
-                        >
-                        <p class="upload-hint">Verwenden Sie eine URL von Unsplash, Pexels, Pixabay oder anderen kostenlosen Bildseiten</p>
+                        <input type="text" id="imageUrlInput" placeholder="Geben Sie die Bild-URL ein" class="url-input" required>
+                        <input type="text" id="imageTitleInput" placeholder="Bildtitel" class="title-input" required>
+                        <p class="upload-hint">Verwenden Sie URLs von kostenlosen Bildseiten wie Unsplash, Pexels oder Pixabay</p>
                         <div class="button-group">
                             <button type="submit" class="save-button">Hinzufügen</button>
                             <button type="button" id="cancelImageBtn" class="cancel-button">Abbrechen</button>
                         </div>
                     </div>
                 </form>
+
+                <form id="batchUploadForm" class="batch-upload-form" style="display: none;">
+                    <div class="upload-area">
+                        <h3>📋 Batch-Upload (bis zu 300 Bilder)</h3>
+                        <p class="upload-hint">Format: Jede Zeile: URL|Titel (getrennt durch Pipe)</p>
+                        <textarea id="batchInput" class="batch-textarea" placeholder="https://example.com/bild1.jpg|Titel 1&#10;https://example.com/bild2.jpg|Titel 2&#10;https://example.com/bild3.jpg|Titel 3" rows="15"></textarea>
+                        <p class="upload-hint">Beispiel:<br>https://unsplash.com/photo1.jpg|Unser erstes Date<br>https://unsplash.com/photo2.jpg|Unser Abenteuer</p>
+                        <div class="button-group">
+                            <button type="submit" class="save-button">Alle hinzufügen</button>
+                            <button type="button" id="cancelBatchBtn" class="cancel-button">Abbrechen</button>
+                        </div>
+                    </div>
+                </form>
             </section>
 
-            <!-- NOTES SECTION -->
             <section class="section notes-section">
                 <div class="section-header">
-                    <h2>📌 Notizen</h2>
-                    <button id="addNoteBtn" class="edit-button">+ Notiz hinzufügen</button>
+                    <h2>💝 Besondere Momente</h2>
+                    <button id="addNoteBtn" class="edit-button">+ Moment hinzufügen</button>
                 </div>
                 <div id="notesContainer" class="notes-container">
                     <div class="note-card">
-                        <h4>Beispiel-Notiz</h4>
-                        <p>Dies ist eine Beispiel-Notiz. Sie können Notizen hinzufügen, bearbeiten und löschen.</p>
+                        <h4>Unser erstes Treffen</h4>
+                        <p>Der Tag, an dem alles begann...</p>
                         <div class="note-actions">
                             <button class="note-edit-btn" data-index="0">✏️</button>
                             <button class="note-delete-btn" data-index="0">🗑️</button>
@@ -150,20 +110,8 @@
                     </div>
                 </div>
                 <form id="noteForm" class="note-form" style="display: none;">
-                    <input 
-                        type="text" 
-                        id="noteTitleInput" 
-                        placeholder="Notiz-Titel" 
-                        class="note-title-input"
-                        required
-                    >
-                    <textarea 
-                        id="noteContentInput" 
-                        class="note-content-input" 
-                        placeholder="Notiz-Inhalt" 
-                        rows="4"
-                        required
-                    ></textarea>
+                    <input type="text" id="noteTitleInput" placeholder="Moment-Titel" class="note-title-input" required>
+                    <textarea id="noteContentInput" class="note-content-input" placeholder="Beschreiben Sie diesen besonderen Moment..." rows="5" required></textarea>
                     <div class="button-group">
                         <button type="submit" class="save-button">Speichern</button>
                         <button type="button" id="cancelNoteBtn" class="cancel-button">Abbrechen</button>
@@ -172,9 +120,8 @@
             </section>
         </main>
 
-        <!-- FOOTER -->
         <footer class="footer">
-            <p>&copy; 2024 Meine Private Seite. Alle Inhalte sind verschlüsselt und passwortgeschützt.</p>
+            <p>&copy; 2024 Leo & Carla - Unsere gemeinsamen Erinnerungen. Alle Inhalte sind privat und passwortgeschützt.</p>
         </footer>
     </div>
 
