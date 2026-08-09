@@ -1,8 +1,89 @@
 const CORRECT_PASSWORD = '0303';
-const STORAGE_KEY = 'leoCarlaMemories';
-const MAX_STORAGE = 50 * 1024 * 1024; // 50MB
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB pro Datei
+const DB_NAME = 'LeoCarlaDB';
+const DB_VERSION = 1;
 
+let db;
+
+// IndexedDB Initialisierung
+function initDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            db = request.result;
+            resolve(db);
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('media')) {
+                db.createObjectStore('media', { keyPath: 'id', autoIncrement: true });
+            }
+            if (!db.objectStoreNames.contains('metadata')) {
+                db.createObjectStore('metadata', { keyPath: 'key' });
+            }
+        };
+    });
+}
+
+class DataManager {
+    static async setText(text) {
+        const tx = db.transaction('metadata', 'readwrite');
+        tx.objectStore('metadata').put({ key: 'text', value: text });
+        return new Promise((r) => tx.oncomplete = r);
+    }
+
+    static async getText() {
+        const tx = db.transaction('metadata', 'readonly');
+        const result = await new Promise((r) => {
+            const req = tx.objectStore('metadata').get('text');
+            req.onsuccess = () => r(req.result);
+        });
+        return result?.value || '<h3>Willkommen!</h3><p>Unsere gemeinsamen Erinnerungen...</p>';
+    }
+
+    static async addMedia(item) {
+        const tx = db.transaction('media', 'readwrite');
+        return new Promise((r) => {
+            tx.objectStore('media').add(item);
+            tx.oncomplete = r;
+        });
+    }
+
+    static async getMedia() {
+        const tx = db.transaction('media', 'readonly');
+        return new Promise((r) => {
+            const req = tx.objectStore('media').getAll();
+            req.onsuccess = () => r(req.result);
+        });
+    }
+
+    static async deleteMedia(id) {
+        const tx = db.transaction('media', 'readwrite');
+        return new Promise((r) => {
+            tx.objectStore('media').delete(id);
+            tx.oncomplete = r;
+        });
+    }
+
+    static async setNotes(notes) {
+        const tx = db.transaction('metadata', 'readwrite');
+        tx.objectStore('metadata').put({ key: 'notes', value: notes });
+        return new Promise((r) => tx.oncomplete = r);
+    }
+
+    static async getNotes() {
+        const tx = db.transaction('metadata', 'readonly');
+        const result = await new Promise((r) => {
+            const req = tx.objectStore('metadata').get('notes');
+            req.onsuccess = () => r(req.result);
+        });
+        return result?.value || [{ title: 'Unser erstes Treffen', content: 'Der Tag, an dem alles begann...' }];
+    }
+}
+
+// DOM Elements
 const loginForm = document.getElementById('loginForm');
 const passwordInput = document.getElementById('passwordInput');
 const loginScreen = document.getElementById('loginScreen');
@@ -36,81 +117,14 @@ const cancelNoteBtn = document.getElementById('cancelNoteBtn');
 
 let selectedFiles = [];
 
-class DataManager {
-    static getData() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : this.getDefaultData();
-        } catch (e) {
-            console.error('Fehler beim Laden der Daten:', e);
-            return this.getDefaultData();
-        }
-    }
-
-    static getDefaultData() {
-        return {
-            text: `<h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
-<p>Dies ist unser persönlicher Platz für unsere liebsten Momente.</p>`,
-            media: [
-                { type: 'image', data: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop', title: 'Erinnerung 1', size: 0 }
-            ],
-            notes: [
-                { title: 'Unser erstes Treffen', content: 'Der Tag, an dem alles begann...' }
-            ]
-        };
-    }
-
-    static saveData(data) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        } catch (e) {
-            if (e.name === 'QuotaExceededError') {
-                alert('❌ Speicher voll! Bitte löschen Sie einige Dateien.');
-            } else {
-                console.error('Fehler beim Speichern:', e);
-            }
-        }
-    }
-
-    static getStorageUsed() {
-        const data = this.getData();
-        let size = JSON.stringify(data).length;
-        return size;
-    }
-
-    static getText() { return this.getData().text; }
-    static setText(text) { const data = this.getData(); data.text = text; this.saveData(data); }
-    static getMedia() { return this.getData().media; }
-    static addMedia(item) { const data = this.getData(); data.media.push(item); this.saveData(data); }
-    static deleteMedia(index) { const data = this.getData(); data.media.splice(index, 1); this.saveData(data); }
-    static getNotes() { return this.getData().notes; }
-    static addNote(title, content) { const data = this.getData(); data.notes.push({ title, content }); this.saveData(data); }
-    static updateNote(index, title, content) { const data = this.getData(); data.notes[index] = { title, content }; this.saveData(data); }
-    static deleteNote(index) { const data = this.getData(); data.notes.splice(index, 1); this.saveData(data); }
-}
-
-function updateStorageInfo() {
-    const used = DataManager.getStorageUsed();
-    const usedMB = (used / (1024 * 1024)).toFixed(1);
-    const maxMB = (MAX_STORAGE / (1024 * 1024)).toFixed(0);
-    storageInfo.textContent = `Speicher: ${usedMB}/${maxMB}MB`;
-    
-    if (used > MAX_STORAGE * 0.9) {
-        storageInfo.style.color = '#e74c3c';
-    } else if (used > MAX_STORAGE * 0.7) {
-        storageInfo.style.color = '#f39c12';
-    } else {
-        storageInfo.style.color = '#7f8c8d';
-    }
-}
-
-loginForm.addEventListener('submit', (e) => {
+// Login
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (passwordInput.value === CORRECT_PASSWORD) {
         loginScreen.style.display = 'none';
         mainContent.style.display = 'block';
         passwordInput.value = '';
-        loadAllContent();
+        await loadAllContent();
     } else {
         document.getElementById('loginError').textContent = '❌ Falsches Passwort!';
         passwordInput.value = '';
@@ -124,8 +138,10 @@ logoutBtn.addEventListener('click', () => {
     }
 });
 
-editTextBtn.addEventListener('click', () => {
-    textInput.value = textDisplay.innerHTML.replace(/<br\/?>/g, '\n').replace(/<[^>]*>/g, '');
+// Text Management
+editTextBtn.addEventListener('click', async () => {
+    const text = await DataManager.getText();
+    textInput.value = text.replace(/<br\/?>/g, '\n').replace(/<[^>]*>/g, '');
     textDisplay.style.display = 'none';
     textEditForm.style.display = 'block';
 });
@@ -135,42 +151,49 @@ cancelTextBtn.addEventListener('click', () => {
     textDisplay.style.display = 'block';
 });
 
-textEditForm.addEventListener('submit', (e) => {
+textEditForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = textInput.value.trim();
     if (text) {
         const formatted = text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('');
         textDisplay.innerHTML = formatted;
-        DataManager.setText(formatted);
+        await DataManager.setText(formatted);
         textEditForm.style.display = 'none';
         textDisplay.style.display = 'block';
     }
 });
 
-function renderGallery() {
-    const media = DataManager.getMedia();
+// Gallery
+async function renderGallery() {
+    const media = await DataManager.getMedia();
     galleryContainer.innerHTML = '';
-    media.forEach((item, index) => {
+    storageInfo.textContent = `📦 Geladen: ${media.length}`;
+    
+    media.forEach((item) => {
         const element = document.createElement('div');
         element.className = 'gallery-item';
+        
+        const url = item.type === 'video' 
+            ? URL.createObjectURL(item.blob)
+            : URL.createObjectURL(item.blob);
         
         if (item.type === 'video') {
             element.innerHTML = `
                 <video controls style="width:100%; height:150px; background:#000;">
-                    <source src="${item.data}">
+                    <source src="${url}">
                 </video>
-                <div class="video-badge">🎥</div>
+                <div class="video-badge">🎥 ${Math.round(item.blob.size / (1024*1024))}MB</div>
                 <div class="image-info">
                     <p>${item.title}</p>
-                    <button class="delete-media-btn" data-index="${index}" type="button">🗑️</button>
+                    <button class="delete-media-btn" data-id="${item.id}" type="button">🗑️</button>
                 </div>
             `;
         } else {
             element.innerHTML = `
-                <img src="${item.data}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3C/svg%3E'">
+                <img src="${url}">
                 <div class="image-info">
                     <p>${item.title}</p>
-                    <button class="delete-media-btn" data-index="${index}" type="button">🗑️</button>
+                    <button class="delete-media-btn" data-id="${item.id}" type="button">🗑️</button>
                 </div>
             `;
         }
@@ -178,12 +201,11 @@ function renderGallery() {
     });
 
     document.querySelectorAll('.delete-media-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
             if (confirm('Löschen?')) {
-                DataManager.deleteMedia(parseInt(btn.dataset.index));
+                await DataManager.deleteMedia(parseInt(btn.dataset.id));
                 renderGallery();
-                updateStorageInfo();
             }
         });
     });
@@ -204,51 +226,42 @@ cancelUploadBtn.addEventListener('click', () => {
 });
 
 mediaFileInput.addEventListener('change', (e) => {
-    selectedFiles = [];
-    for (let file of e.target.files) {
-        if (file.size > MAX_FILE_SIZE) {
-            alert(`❌ ${file.name} ist zu groß (Max 5MB)`);
-        } else {
-            selectedFiles.push(file);
-        }
-    }
+    selectedFiles = Array.from(e.target.files);
     displayPreviews();
 });
 
 function displayPreviews() {
     previewContainer.innerHTML = '';
     selectedFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const div = document.createElement('div');
-            div.className = 'preview-item';
-            
-            if (file.type.startsWith('video/')) {
-                div.innerHTML = `
-                    <video style="width:100%; height:100%; object-fit:cover;">
-                        <source src="${e.target.result}">
-                    </video>
-                    <button class="remove-preview" data-index="${index}" type="button">✕</button>
-                `;
-            } else {
-                div.innerHTML = `
-                    <img src="${e.target.result}">
-                    <button class="remove-preview" data-index="${index}" type="button">✕</button>
-                `;
-            }
-            previewContainer.appendChild(div);
-        };
-        reader.readAsDataURL(file);
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        
+        const url = URL.createObjectURL(file);
+        const sizeMB = (file.size / (1024*1024)).toFixed(1);
+        
+        if (file.type.startsWith('video/')) {
+            div.innerHTML = `
+                <video style="width:100%; height:100%; object-fit:cover;">
+                    <source src="${url}">
+                </video>
+                <div style="position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.65rem;">🎥 ${sizeMB}MB</div>
+                <button class="remove-preview" data-index="${index}" type="button">✕</button>
+            `;
+        } else {
+            div.innerHTML = `
+                <img src="${url}">
+                <button class="remove-preview" data-index="${index}" type="button">✕</button>
+            `;
+        }
+        previewContainer.appendChild(div);
     });
 
-    setTimeout(() => {
-        document.querySelectorAll('.remove-preview').forEach(btn => {
-            btn.addEventListener('click', () => {
-                selectedFiles.splice(parseInt(btn.dataset.index), 1);
-                displayPreviews();
-            });
+    document.querySelectorAll('.remove-preview').forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedFiles.splice(parseInt(btn.dataset.index), 1);
+            displayPreviews();
         });
-    }, 100);
+    });
 }
 
 async function uploadMedia() {
@@ -257,59 +270,49 @@ async function uploadMedia() {
         return;
     }
 
-    const stored = DataManager.getStorageUsed();
-    if (stored > MAX_STORAGE * 0.9) {
-        alert('❌ Speicher zu 90% voll! Bitte löschen Sie Dateien.');
-        return;
-    }
-
     uploadProgress.style.display = 'block';
     let uploaded = 0;
 
     for (const file of selectedFiles) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const type = file.type.startsWith('video/') ? 'video' : 'image';
-            DataManager.addMedia({
-                type: type,
-                data: reader.result,
-                title: file.name.replace(/\.[^/.]+$/, ''),
-                size: file.size
-            });
-            
-            uploaded++;
-            const percent = Math.round((uploaded / selectedFiles.length) * 100);
-            progressFill.style.width = percent + '%';
-            progressText.textContent = `${percent}%`;
-
-            if (uploaded === selectedFiles.length) {
-                renderGallery();
-                updateStorageInfo();
-                uploadArea.style.display = 'none';
-                selectedFiles = [];
-                previewContainer.innerHTML = '';
-                uploadProgress.style.display = 'none';
-                alert(`✅ ${uploaded} Datei(en) hochgeladen!`);
-            }
-        };
-        reader.readAsDataURL(file);
+        const type = file.type.startsWith('video/') ? 'video' : 'image';
+        const title = file.name.replace(/\.[^/.]+$/, '');
+        
+        await DataManager.addMedia({
+            type: type,
+            blob: file,
+            title: title,
+            size: file.size
+        });
+        
+        uploaded++;
+        const percent = Math.round((uploaded / selectedFiles.length) * 100);
+        progressFill.style.width = percent + '%';
+        progressText.textContent = `${percent}%`;
     }
+
+    renderGallery();
+    uploadArea.style.display = 'none';
+    selectedFiles = [];
+    previewContainer.innerHTML = '';
+    uploadProgress.style.display = 'none';
+    alert(`✅ ${uploaded} Datei(en) hochgeladen!`);
 }
 
-uploadArea.querySelector('.upload-container').appendChild((() => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'save-button';
-    btn.textContent = '✅ Hochladen';
-    btn.style.width = '100%';
-    btn.style.marginTop = '1rem';
-    btn.addEventListener('click', uploadMedia);
-    return btn;
-})());
+// Upload Button
+const uploadBtn = document.createElement('button');
+uploadBtn.type = 'button';
+uploadBtn.className = 'save-button';
+uploadBtn.textContent = '✅ Hochladen';
+uploadBtn.style.width = '100%';
+uploadBtn.style.marginTop = '1rem';
+uploadBtn.addEventListener('click', uploadMedia);
+uploadArea.querySelector('.upload-container').appendChild(uploadBtn);
 
-function renderNotes() {
-    const notes = DataManager.getNotes();
+// Notes
+async function renderNotes() {
+    const notes = await DataManager.getNotes();
     notesContainer.innerHTML = '';
+    
     notes.forEach((note, index) => {
         const card = document.createElement('div');
         card.className = 'note-card';
@@ -325,22 +328,25 @@ function renderNotes() {
     });
 
     document.querySelectorAll('.note-edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
+            const notes = await DataManager.getNotes();
             const index = parseInt(btn.dataset.index);
-            const note = notes[index];
-            noteTitleInput.value = note.title;
-            noteContentInput.value = note.content;
+            noteTitleInput.value = notes[index].title;
+            noteContentInput.value = notes[index].content;
             noteForm.dataset.index = index;
             noteForm.style.display = 'block';
         });
     });
 
     document.querySelectorAll('.note-delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
+            const notes = await DataManager.getNotes();
+            const index = parseInt(btn.dataset.index);
             if (confirm('Löschen?')) {
-                DataManager.deleteNote(parseInt(btn.dataset.index));
+                notes.splice(index, 1);
+                await DataManager.setNotes(notes);
                 renderNotes();
             }
         });
@@ -358,32 +364,36 @@ cancelNoteBtn.addEventListener('click', () => {
     noteForm.style.display = 'none';
 });
 
-noteForm.addEventListener('submit', (e) => {
+noteForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = noteTitleInput.value.trim();
     const content = noteContentInput.value.trim();
+    
     if (title && content) {
+        const notes = await DataManager.getNotes();
         if (noteForm.dataset.index !== undefined) {
-            DataManager.updateNote(parseInt(noteForm.dataset.index), title, content);
+            notes[parseInt(noteForm.dataset.index)] = { title, content };
         } else {
-            DataManager.addNote(title, content);
+            notes.push({ title, content });
         }
+        await DataManager.setNotes(notes);
         renderNotes();
         noteForm.style.display = 'none';
     }
 });
 
-function loadAllContent() {
-    textDisplay.innerHTML = DataManager.getText();
+// Init
+async function loadAllContent() {
+    textDisplay.innerHTML = await DataManager.getText();
     renderGallery();
     renderNotes();
-    updateStorageInfo();
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+    await initDB();
     if (loginScreen.style.display !== 'none') {
         passwordInput.focus();
     }
 });
 
-console.log('💑 Leo & Carla - Mit Speicherschutz! ✨');
+console.log('💑 Leo & Carla mit IndexedDB (2GB+ Speicher)! 🚀');
