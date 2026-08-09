@@ -1,11 +1,12 @@
 const CORRECT_PASSWORD = '0303';
 const STORAGE_KEY = 'leoCarlaMemories';
+const MAX_STORAGE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB pro Datei
 
-const loginScreen = document.getElementById('loginScreen');
-const mainContent = document.getElementById('mainContent');
 const loginForm = document.getElementById('loginForm');
 const passwordInput = document.getElementById('passwordInput');
-const loginError = document.getElementById('loginError');
+const loginScreen = document.getElementById('loginScreen');
+const mainContent = document.getElementById('mainContent');
 const logoutBtn = document.getElementById('logoutBtn');
 
 const editTextBtn = document.getElementById('editTextBtn');
@@ -24,6 +25,7 @@ const previewContainer = document.getElementById('previewContainer');
 const uploadProgress = document.getElementById('uploadProgress');
 const progressText = document.getElementById('progressText');
 const progressFill = document.getElementById('progressFill');
+const storageInfo = document.getElementById('storageInfo');
 
 const addNoteBtn = document.getElementById('addNoteBtn');
 const notesContainer = document.getElementById('notesContainer');
@@ -36,19 +38,21 @@ let selectedFiles = [];
 
 class DataManager {
     static getData() {
-        const data = localStorage.getItem(STORAGE_KEY);
-        return data ? JSON.parse(data) : this.getDefaultData();
+        try {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : this.getDefaultData();
+        } catch (e) {
+            console.error('Fehler beim Laden der Daten:', e);
+            return this.getDefaultData();
+        }
     }
 
     static getDefaultData() {
         return {
             text: `<h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
-<p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente, gemeinsamen Abenteuer und wertvollen Erinnerungen festhalten können.</p>
-<p>Hier können wir unsere Geschichte erzählen - die Momente, die uns verbinden, die Erlebnisse, die wir teilen, und die Liebe, die wir füreinander haben.</p>`,
+<p>Dies ist unser persönlicher Platz für unsere liebsten Momente.</p>`,
             media: [
-                { type: 'image', data: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop', title: 'Erinnerung 1' },
-                { type: 'image', data: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop', title: 'Erinnerung 2' },
-                { type: 'image', data: 'https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop', title: 'Erinnerung 3' }
+                { type: 'image', data: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop', title: 'Erinnerung 1', size: 0 }
             ],
             notes: [
                 { title: 'Unser erstes Treffen', content: 'Der Tag, an dem alles begann...' }
@@ -57,14 +61,27 @@ class DataManager {
     }
 
     static saveData(data) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                alert('❌ Speicher voll! Bitte löschen Sie einige Dateien.');
+            } else {
+                console.error('Fehler beim Speichern:', e);
+            }
+        }
+    }
+
+    static getStorageUsed() {
+        const data = this.getData();
+        let size = JSON.stringify(data).length;
+        return size;
     }
 
     static getText() { return this.getData().text; }
     static setText(text) { const data = this.getData(); data.text = text; this.saveData(data); }
     static getMedia() { return this.getData().media; }
-    static addMedia(mediaItem) { const data = this.getData(); data.media.push(mediaItem); this.saveData(data); }
-    static addMultipleMedia(mediaItems) { const data = this.getData(); data.media.push(...mediaItems); this.saveData(data); }
+    static addMedia(item) { const data = this.getData(); data.media.push(item); this.saveData(data); }
     static deleteMedia(index) { const data = this.getData(); data.media.splice(index, 1); this.saveData(data); }
     static getNotes() { return this.getData().notes; }
     static addNote(title, content) { const data = this.getData(); data.notes.push({ title, content }); this.saveData(data); }
@@ -72,36 +89,45 @@ class DataManager {
     static deleteNote(index) { const data = this.getData(); data.notes.splice(index, 1); this.saveData(data); }
 }
 
+function updateStorageInfo() {
+    const used = DataManager.getStorageUsed();
+    const usedMB = (used / (1024 * 1024)).toFixed(1);
+    const maxMB = (MAX_STORAGE / (1024 * 1024)).toFixed(0);
+    storageInfo.textContent = `Speicher: ${usedMB}/${maxMB}MB`;
+    
+    if (used > MAX_STORAGE * 0.9) {
+        storageInfo.style.color = '#e74c3c';
+    } else if (used > MAX_STORAGE * 0.7) {
+        storageInfo.style.color = '#f39c12';
+    } else {
+        storageInfo.style.color = '#7f8c8d';
+    }
+}
+
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     if (passwordInput.value === CORRECT_PASSWORD) {
-        loginError.textContent = '';
         loginScreen.style.display = 'none';
         mainContent.style.display = 'block';
         passwordInput.value = '';
         loadAllContent();
     } else {
-        loginError.textContent = '❌ Falsches Passwort. Bitte versuchen Sie es erneut.';
+        document.getElementById('loginError').textContent = '❌ Falsches Passwort!';
         passwordInput.value = '';
-        passwordInput.focus();
     }
 });
 
 logoutBtn.addEventListener('click', () => {
-    if (confirm('Möchten Sie sich wirklich abmelden?')) {
+    if (confirm('Abmelden?')) {
         loginScreen.style.display = 'flex';
         mainContent.style.display = 'none';
-        passwordInput.value = '';
-        passwordInput.focus();
     }
 });
 
 editTextBtn.addEventListener('click', () => {
-    const textContent = textDisplay.innerHTML;
-    textInput.value = textContent.replace(/<br\/?>/g, '\n').replace(/<[^>]*>/g, '');
+    textInput.value = textDisplay.innerHTML.replace(/<br\/?>/g, '\n').replace(/<[^>]*>/g, '');
     textDisplay.style.display = 'none';
     textEditForm.style.display = 'block';
-    textInput.focus();
 });
 
 cancelTextBtn.addEventListener('click', () => {
@@ -111,66 +137,53 @@ cancelTextBtn.addEventListener('click', () => {
 
 textEditForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const text = textInput.value;
-    if (text.trim()) {
-        const formattedText = text.split('\n').filter(line => line.trim()).map(line => `<p>${line}</p>`).join('');
-        textDisplay.innerHTML = formattedText;
-        DataManager.setText(formattedText);
+    const text = textInput.value.trim();
+    if (text) {
+        const formatted = text.split('\n').filter(l => l.trim()).map(l => `<p>${l}</p>`).join('');
+        textDisplay.innerHTML = formatted;
+        DataManager.setText(formatted);
         textEditForm.style.display = 'none';
         textDisplay.style.display = 'block';
-    } else {
-        alert('Bitte geben Sie einen Text ein.');
     }
 });
 
-function isVideoFile(file) {
-    return file.type.startsWith('video/');
-}
-
-function isImageFile(file) {
-    return file.type.startsWith('image/');
-}
-
 function renderGallery() {
-    const mediaItems = DataManager.getMedia();
+    const media = DataManager.getMedia();
     galleryContainer.innerHTML = '';
-    
-    mediaItems.forEach((media, index) => {
-        const item = document.createElement('div');
-        item.className = 'gallery-item';
+    media.forEach((item, index) => {
+        const element = document.createElement('div');
+        element.className = 'gallery-item';
         
-        if (media.type === 'video') {
-            item.innerHTML = `
-                <video controls style="width: 100%; height: 180px; object-fit: cover; background: #000;">
-                    <source src="${media.data}" type="video/mp4">
-                    Ihr Browser unterstützt das Video-Tag nicht.
+        if (item.type === 'video') {
+            element.innerHTML = `
+                <video controls style="width:100%; height:150px; background:#000;">
+                    <source src="${item.data}">
                 </video>
-                <div class="video-badge">🎥 VIDEO</div>
+                <div class="video-badge">🎥</div>
                 <div class="image-info">
-                    <p>${media.title}</p>
+                    <p>${item.title}</p>
                     <button class="delete-media-btn" data-index="${index}" type="button">🗑️</button>
                 </div>
             `;
         } else {
-            item.innerHTML = `
-                <img src="${media.data}" alt="${media.title}" onerror="this.src='https://via.placeholder.com/500?text=Fehler'">
+            element.innerHTML = `
+                <img src="${item.data}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22%3E%3C/svg%3E'">
                 <div class="image-info">
-                    <p>${media.title}</p>
+                    <p>${item.title}</p>
                     <button class="delete-media-btn" data-index="${index}" type="button">🗑️</button>
                 </div>
             `;
         }
-        
-        galleryContainer.appendChild(item);
+        galleryContainer.appendChild(element);
     });
-    
+
     document.querySelectorAll('.delete-media-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            e.stopPropagation();
-            if (confirm('Dieses Element wirklich löschen?')) {
+            if (confirm('Löschen?')) {
                 DataManager.deleteMedia(parseInt(btn.dataset.index));
                 renderGallery();
+                updateStorageInfo();
             }
         });
     });
@@ -180,24 +193,25 @@ addMediaBtn.addEventListener('click', () => {
     uploadArea.style.display = 'block';
     selectedFiles = [];
     previewContainer.innerHTML = '';
-    progressFill.style.width = '0%';
 });
 
-selectFilesBtn.addEventListener('click', () => {
-    mediaFileInput.click();
-});
+selectFilesBtn.addEventListener('click', () => mediaFileInput.click());
 
 cancelUploadBtn.addEventListener('click', () => {
     uploadArea.style.display = 'none';
-    mediaFileInput.value = '';
     selectedFiles = [];
     previewContainer.innerHTML = '';
-    progressFill.style.width = '0%';
-    uploadProgress.style.display = 'none';
 });
 
 mediaFileInput.addEventListener('change', (e) => {
-    selectedFiles = Array.from(e.target.files);
+    selectedFiles = [];
+    for (let file of e.target.files) {
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`❌ ${file.name} ist zu groß (Max 5MB)`);
+        } else {
+            selectedFiles.push(file);
+        }
+    }
     displayPreviews();
 });
 
@@ -209,22 +223,19 @@ function displayPreviews() {
             const div = document.createElement('div');
             div.className = 'preview-item';
             
-            if (isVideoFile(file)) {
+            if (file.type.startsWith('video/')) {
                 div.innerHTML = `
-                    <video style="width: 100%; height: 100%; object-fit: cover;">
-                        <source src="${e.target.result}" type="${file.type}">
+                    <video style="width:100%; height:100%; object-fit:cover;">
+                        <source src="${e.target.result}">
                     </video>
-                    <div class="preview-video-badge">🎥</div>
-                    <div class="preview-play">▶</div>
-                    <button class="remove-preview" type="button" data-index="${index}">✕</button>
+                    <button class="remove-preview" data-index="${index}" type="button">✕</button>
                 `;
             } else {
                 div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <button class="remove-preview" type="button" data-index="${index}">✕</button>
+                    <img src="${e.target.result}">
+                    <button class="remove-preview" data-index="${index}" type="button">✕</button>
                 `;
             }
-            
             previewContainer.appendChild(div);
         };
         reader.readAsDataURL(file);
@@ -232,10 +243,8 @@ function displayPreviews() {
 
     setTimeout(() => {
         document.querySelectorAll('.remove-preview').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const index = parseInt(btn.dataset.index);
-                selectedFiles.splice(index, 1);
+            btn.addEventListener('click', () => {
+                selectedFiles.splice(parseInt(btn.dataset.index), 1);
                 displayPreviews();
             });
         });
@@ -244,66 +253,59 @@ function displayPreviews() {
 
 async function uploadMedia() {
     if (selectedFiles.length === 0) {
-        alert('Bitte wählen Sie mindestens ein Bild oder Video aus.');
+        alert('Keine Dateien ausgewählt!');
+        return;
+    }
+
+    const stored = DataManager.getStorageUsed();
+    if (stored > MAX_STORAGE * 0.9) {
+        alert('❌ Speicher zu 90% voll! Bitte löschen Sie Dateien.');
         return;
     }
 
     uploadProgress.style.display = 'block';
-    const mediaToAdd = [];
     let uploaded = 0;
 
     for (const file of selectedFiles) {
         const reader = new FileReader();
         reader.onload = () => {
-            const mediaType = isVideoFile(file) ? 'video' : 'image';
-            mediaToAdd.push({
-                type: mediaType,
+            const type = file.type.startsWith('video/') ? 'video' : 'image';
+            DataManager.addMedia({
+                type: type,
                 data: reader.result,
-                title: file.name.replace(/\.[^/.]+$/, '')
+                title: file.name.replace(/\.[^/.]+$/, ''),
+                size: file.size
             });
+            
             uploaded++;
             const percent = Math.round((uploaded / selectedFiles.length) * 100);
             progressFill.style.width = percent + '%';
-            progressText.textContent = `Laden... ${percent}%`;
+            progressText.textContent = `${percent}%`;
 
             if (uploaded === selectedFiles.length) {
-                DataManager.addMultipleMedia(mediaToAdd);
                 renderGallery();
+                updateStorageInfo();
                 uploadArea.style.display = 'none';
-                mediaFileInput.value = '';
                 selectedFiles = [];
                 previewContainer.innerHTML = '';
-                progressFill.style.width = '0%';
                 uploadProgress.style.display = 'none';
-                const imageCount = mediaToAdd.filter(m => m.type === 'image').length;
-                const videoCount = mediaToAdd.filter(m => m.type === 'video').length;
-                let msg = '✅ Erfolgreich hochgeladen: ';
-                if (imageCount > 0) msg += `${imageCount} Bild(er) `;
-                if (videoCount > 0) msg += `${videoCount} Video(s)`;
-                alert(msg);
+                alert(`✅ ${uploaded} Datei(en) hochgeladen!`);
             }
         };
         reader.readAsDataURL(file);
     }
 }
 
-previewContainer.addEventListener('dblclick', (e) => {
-    if (selectedFiles.length > 0) {
-        uploadMedia();
-    }
-});
-
-const uploadButton = document.createElement('button');
-uploadButton.type = 'button';
-uploadButton.className = 'save-button';
-uploadButton.textContent = '✅ Bilder & Videos hochladen';
-uploadButton.style.width = '100%';
-uploadButton.style.marginTop = '1rem';
-uploadButton.addEventListener('click', uploadMedia);
-
-const uploadButtonClone = uploadButton.cloneNode(true);
-uploadButtonClone.addEventListener('click', uploadMedia);
-uploadArea.querySelector('.upload-container').appendChild(uploadButtonClone);
+uploadArea.querySelector('.upload-container').appendChild((() => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'save-button';
+    btn.textContent = '✅ Hochladen';
+    btn.style.width = '100%';
+    btn.style.marginTop = '1rem';
+    btn.addEventListener('click', uploadMedia);
+    return btn;
+})());
 
 function renderNotes() {
     const notes = DataManager.getNotes();
@@ -329,16 +331,15 @@ function renderNotes() {
             const note = notes[index];
             noteTitleInput.value = note.title;
             noteContentInput.value = note.content;
-            noteForm.dataset.editingIndex = index;
+            noteForm.dataset.index = index;
             noteForm.style.display = 'block';
-            noteTitleInput.focus();
         });
     });
 
     document.querySelectorAll('.note-delete-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (confirm('Diesen Moment wirklich löschen?')) {
+            if (confirm('Löschen?')) {
                 DataManager.deleteNote(parseInt(btn.dataset.index));
                 renderNotes();
             }
@@ -349,14 +350,12 @@ function renderNotes() {
 addNoteBtn.addEventListener('click', () => {
     noteTitleInput.value = '';
     noteContentInput.value = '';
-    delete noteForm.dataset.editingIndex;
+    delete noteForm.dataset.index;
     noteForm.style.display = 'block';
-    noteTitleInput.focus();
 });
 
 cancelNoteBtn.addEventListener('click', () => {
     noteForm.style.display = 'none';
-    delete noteForm.dataset.editingIndex;
 });
 
 noteForm.addEventListener('submit', (e) => {
@@ -364,27 +363,21 @@ noteForm.addEventListener('submit', (e) => {
     const title = noteTitleInput.value.trim();
     const content = noteContentInput.value.trim();
     if (title && content) {
-        const editingIndex = noteForm.dataset.editingIndex;
-        if (editingIndex !== undefined) {
-            DataManager.updateNote(parseInt(editingIndex), title, content);
+        if (noteForm.dataset.index !== undefined) {
+            DataManager.updateNote(parseInt(noteForm.dataset.index), title, content);
         } else {
             DataManager.addNote(title, content);
         }
         renderNotes();
         noteForm.style.display = 'none';
-        noteTitleInput.value = '';
-        noteContentInput.value = '';
-        delete noteForm.dataset.editingIndex;
-    } else {
-        alert('Bitte füllen Sie alle Felder aus.');
     }
 });
 
 function loadAllContent() {
-    const text = DataManager.getText();
-    textDisplay.innerHTML = text;
+    textDisplay.innerHTML = DataManager.getText();
     renderGallery();
     renderNotes();
+    updateStorageInfo();
 }
 
 window.addEventListener('load', () => {
@@ -393,12 +386,4 @@ window.addEventListener('load', () => {
     }
 });
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        if (textEditForm.style.display === 'block') cancelTextBtn.click();
-        if (uploadArea.style.display === 'block') cancelUploadBtn.click();
-        if (noteForm.style.display === 'block') cancelNoteBtn.click();
-    }
-});
-
-console.log('💑 Leo & Carla - Unsere Erinnerungen mit Videos! 🎬✨');
+console.log('💑 Leo & Carla - Mit Speicherschutz! ✨');
