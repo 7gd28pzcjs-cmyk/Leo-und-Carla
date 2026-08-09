@@ -41,7 +41,7 @@
                 </div>
                 <div id="textDisplay" class="text-display">
                     <h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
-                    <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente, gemeinsamen Abenteuer und wertvollen Erinnerungen festhalten können.</p>
+                    <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente festhalten.</p>
                 </div>
                 <form id="textEditForm" class="text-edit-form" style="display: none;">
                     <textarea id="textInput" class="text-input" placeholder="Erzählen Sie unsere Geschichte..." rows="10"></textarea>
@@ -55,26 +55,18 @@
             <section class="section images-section">
                 <div class="section-header">
                     <h2>🎬 Unsere Erinnerungen</h2>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
                         <button id="addMediaBtn" class="edit-button">📱 Hochladen</button>
-                        <span class="storage-info" id="storageInfo">Speicher: 0/50MB</span>
+                        <span class="storage-info" id="storageInfo">📦 Geladen: 0</span>
                     </div>
                 </div>
                 
-                <div id="galleryContainer" class="gallery">
-                    <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Erinnerung 1">
-                        <div class="image-info">
-                            <p>Erinnerung 1</p>
-                            <button class="delete-media-btn" data-index="0" type="button">🗑️</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="galleryContainer" class="gallery"></div>
 
                 <div id="uploadArea" class="upload-area-hidden" style="display: none;">
                     <input type="file" id="mediaFileInput" accept="image/*,video/*" multiple style="display: none;">
                     <div class="upload-container">
-                        <p class="upload-hint">📸 🎥 Max 50MB gesamt | Max 5MB pro Datei</p>
+                        <p class="upload-hint">📸 🎥 Beliebig viele Bilder & Videos (bis 2GB+)</p>
                         <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder & Videos auswählen</button>
                         <button type="button" id="cancelUploadBtn" class="cancel-button">Abbrechen</button>
                         <div id="previewContainer" class="preview-container"></div>
@@ -93,16 +85,7 @@
                     <h2>💝 Besondere Momente</h2>
                     <button id="addNoteBtn" class="edit-button">+ Moment</button>
                 </div>
-                <div id="notesContainer" class="notes-container">
-                    <div class="note-card">
-                        <h4>Unser erstes Treffen</h4>
-                        <p>Der Tag, an dem alles begann...</p>
-                        <div class="note-actions">
-                            <button class="note-edit-btn" data-index="0" type="button">✏️</button>
-                            <button class="note-delete-btn" data-index="0" type="button">🗑️</button>
-                        </div>
-                    </div>
-                </div>
+                <div id="notesContainer" class="notes-container"></div>
                 <form id="noteForm" class="note-form" style="display: none;">
                     <input type="text" id="noteTitleInput" placeholder="Titel" class="note-title-input" required>
                     <textarea id="noteContentInput" class="note-content-input" placeholder="Beschreibung..." rows="5" required></textarea>
