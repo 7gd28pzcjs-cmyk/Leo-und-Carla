@@ -167,22 +167,20 @@ textEditForm.addEventListener('submit', async (e) => {
 async function renderGallery() {
     const media = await DataManager.getMedia();
     galleryContainer.innerHTML = '';
-    storageInfo.textContent = `📦 Geladen: ${media.length}`;
+    storageInfo.textContent = `📦 Gespeichert: ${media.length}`;
     
     media.forEach((item) => {
         const element = document.createElement('div');
         element.className = 'gallery-item';
         
-        const url = item.type === 'video' 
-            ? URL.createObjectURL(item.blob)
-            : URL.createObjectURL(item.blob);
+        const url = URL.createObjectURL(item.blob);
         
         if (item.type === 'video') {
             element.innerHTML = `
                 <video controls style="width:100%; height:150px; background:#000;">
                     <source src="${url}">
                 </video>
-                <div class="video-badge">🎥 ${Math.round(item.blob.size / (1024*1024))}MB</div>
+                <div class="video-badge">🎥</div>
                 <div class="image-info">
                     <p>${item.title}</p>
                     <button class="delete-media-btn" data-id="${item.id}" type="button">🗑️</button>
@@ -237,14 +235,13 @@ function displayPreviews() {
         div.className = 'preview-item';
         
         const url = URL.createObjectURL(file);
-        const sizeMB = (file.size / (1024*1024)).toFixed(1);
         
         if (file.type.startsWith('video/')) {
             div.innerHTML = `
                 <video style="width:100%; height:100%; object-fit:cover;">
                     <source src="${url}">
                 </video>
-                <div style="position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.65rem;">🎥 ${sizeMB}MB</div>
+                <div style="position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.7); color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.65rem;">🎥</div>
                 <button class="remove-preview" data-index="${index}" type="button">✕</button>
             `;
         } else {
@@ -280,8 +277,7 @@ async function uploadMedia() {
         await DataManager.addMedia({
             type: type,
             blob: file,
-            title: title,
-            size: file.size
+            title: title
         });
         
         uploaded++;
@@ -396,4 +392,4 @@ window.addEventListener('load', async () => {
     }
 });
 
-console.log('💑 Leo & Carla mit IndexedDB (2GB+ Speicher)! 🚀');
+console.log('💑 Leo & Carla mit IndexedDB - Keine Limits! 🚀');
