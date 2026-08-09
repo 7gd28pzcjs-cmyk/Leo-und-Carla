@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Private Seite</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>Private Seite</h1>
+                <p class="login-subtitle">Passwort erforderlich</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <input 
+                        type="password" 
+                        id="passwordInput" 
+                        placeholder="Passwort eingeben" 
+                        class="password-input"
+                        required
+                    >
+                    <span class="input-icon">🔒</span>
+                </div>
+                <button type="submit" class="login-button">
+                    <span>Öffnen</span>
+                    <span class="button-icon">→</span>
+                </button>
+                <div id="loginError" class="login-error"></div>
+            </form>
+            <div class="login-footer">
+                <p>🔐 Diese Seite ist passwortgeschützt</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT (HIDDEN UNTIL LOGIN) -->
+    <div id="mainContent" class="main-content" style="display: none;">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="site-title">Meine Private Seite</h1>
+                <button id="logoutBtn" class="logout-button">
+                    <span>Abmelden</span>
+                    <span class="logout-icon">🚪</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTAINER -->
+        <main class="container">
+            <!-- TEXT SECTION -->
+            <section class="section text-section">
+                <div class="section-header">
+                    <h2>📝 Mein Text</h2>
+                    <button id="editTextBtn" class="edit-button">Bearbeiten</button>
+                </div>
+                <div id="textDisplay" class="text-display">
+                    <h3>Willkommen auf meiner privaten Seite!</h3>
+                    <p>Dies ist mein persönlicher Bereich, in dem ich meine Gedanken, Ideen und Erinnerungen festhalten kann. Hier können alle meine liebsten Momente, Inspirationen und wichtigen Notizen gespeichert werden.</p>
+                    <p>Die Seite ist vollständig passwortgeschützt und nur für mich zugänglich. Ich kann hier frei meine Texte schreiben, bearbeiten und personalisieren, wie es mir gefällt.</p>
+                </div>
+                <form id="textEditForm" class="text-edit-form" style="display: none;">
+                    <textarea 
+                        id="textInput" 
+                        class="text-input" 
+                        placeholder="Geben Sie Ihren Text ein..."
+                        rows="8"
+                    ></textarea>
+                    <div class="button-group">
+                        <button type="submit" class="save-button">Speichern</button>
+                        <button type="button" id="cancelTextBtn" class="cancel-button">Abbrechen</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- IMAGES SECTION -->
+            <section class="section images-section">
+                <div class="section-header">
+                    <h2>🖼️ Meine Bilder</h2>
+                    <button id="addImageBtn" class="edit-button">+ Bild hinzufügen</button>
+                </div>
+                
+                <div class="gallery">
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Berglandschaft">
+                        <div class="image-info">
+                            <p>Berglandschaft</p>
+                            <button class="delete-image-btn" data-index="0">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Sonnenuntergang">
+                        <div class="image-info">
+                            <p>Sonnenuntergang</p>
+                            <button class="delete-image-btn" data-index="1">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Naturscene">
+                        <div class="image-info">
+                            <p>Naturszene</p>
+                            <button class="delete-image-btn" data-index="2">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="imageUploadForm" class="image-upload-form" style="display: none;">
+                    <div class="upload-area">
+                        <input 
+                            type="text" 
+                            id="imageUrlInput" 
+                            placeholder="Geben Sie die Bild-URL ein" 
+                            class="url-input"
+                            required
+                        >
+                        <input 
+                            type="text" 
+                            id="imageTitleInput" 
+                            placeholder="Bildtitel (z.B. 'Mein Urlaub')" 
+                            class="title-input"
+                            required
+                        >
+                        <p class="upload-hint">Verwenden Sie eine URL von Unsplash, Pexels, Pixabay oder anderen kostenlosen Bildseiten</p>
+                        <div class="button-group">
+                            <button type="submit" class="save-button">Hinzufügen</button>
+                            <button type="button" id="cancelImageBtn" class="cancel-button">Abbrechen</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- NOTES SECTION -->
+            <section class="section notes-section">
+                <div class="section-header">
+                    <h2>📌 Notizen</h2>
+                    <button id="addNoteBtn" class="edit-button">+ Notiz hinzufügen</button>
+                </div>
+                <div id="notesContainer" class="notes-container">
+                    <div class="note-card">
+                        <h4>Beispiel-Notiz</h4>
+                        <p>Dies ist eine Beispiel-Notiz. Sie können Notizen hinzufügen, bearbeiten und löschen.</p>
+                        <div class="note-actions">
+                            <button class="note-edit-btn" data-index="0">✏️</button>
+                            <button class="note-delete-btn" data-index="0">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+                <form id="noteForm" class="note-form" style="display: none;">
+                    <input 
+                        type="text" 
+                        id="noteTitleInput" 
+                        placeholder="Notiz-Titel" 
+                        class="note-title-input"
+                        required
+                    >
+                    <textarea 
+                        id="noteContentInput" 
+                        class="note-content-input" 
+                        placeholder="Notiz-Inhalt" 
+                        rows="4"
+                        required
+                    ></textarea>
+                    <div class="button-group">
+                        <button type="submit" class="save-button">Speichern</button>
+                        <button type="button" id="cancelNoteBtn" class="cancel-button">Abbrechen</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>&copy; 2024 Meine Private Seite. Alle Inhalte sind verschlüsselt und passwortgeschützt.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
