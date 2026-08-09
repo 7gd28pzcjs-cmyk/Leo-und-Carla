@@ -15,16 +15,15 @@ const textInput = document.getElementById('textInput');
 const cancelTextBtn = document.getElementById('cancelTextBtn');
 
 const addImageBtn = document.getElementById('addImageBtn');
-const batchUploadBtn = document.getElementById('batchUploadBtn');
 const galleryContainer = document.getElementById('galleryContainer');
-const imageUploadForm = document.getElementById('imageUploadForm');
-const imageUrlInput = document.getElementById('imageUrlInput');
-const imageTitleInput = document.getElementById('imageTitleInput');
-const cancelImageBtn = document.getElementById('cancelImageBtn');
-
-const batchUploadForm = document.getElementById('batchUploadForm');
-const batchInput = document.getElementById('batchInput');
-const cancelBatchBtn = document.getElementById('cancelBatchBtn');
+const uploadArea = document.getElementById('uploadArea');
+const imageFileInput = document.getElementById('imageFileInput');
+const selectFilesBtn = document.getElementById('selectFilesBtn');
+const cancelUploadBtn = document.getElementById('cancelUploadBtn');
+const previewContainer = document.getElementById('previewContainer');
+const uploadProgress = document.getElementById('uploadProgress');
+const progressText = document.getElementById('progressText');
+const progressFill = document.getElementById('progressFill');
 
 const addNoteBtn = document.getElementById('addNoteBtn');
 const notesContainer = document.getElementById('notesContainer');
@@ -32,6 +31,8 @@ const noteForm = document.getElementById('noteForm');
 const noteTitleInput = document.getElementById('noteTitleInput');
 const noteContentInput = document.getElementById('noteContentInput');
 const cancelNoteBtn = document.getElementById('cancelNoteBtn');
+
+let selectedFiles = [];
 
 class DataManager {
     static getData() {
@@ -128,12 +129,20 @@ function renderGallery() {
     images.forEach((image, index) => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
-        item.innerHTML = `<img src="${image.url}" alt="${image.title}" onerror="this.src='https://via.placeholder.com/500?text=Fehler'"><div class="image-info"><p>${image.title}</p><button class="delete-image-btn" data-index="${index}">🗑️</button></div>`;
+        item.innerHTML = `
+            <img src="${image.url}" alt="${image.title}" onerror="this.src='https://via.placeholder.com/500?text=Fehler'">
+            <div class="image-info">
+                <p>${image.title}</p>
+                <button class="delete-image-btn" data-index="${index}" type="button">🗑️</button>
+            </div>
+        `;
         galleryContainer.appendChild(item);
     });
+    
     document.querySelectorAll('.delete-image-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             if (confirm('Dieses Bild wirklich löschen?')) {
                 DataManager.deleteImage(parseInt(btn.dataset.index));
                 renderGallery();
@@ -143,72 +152,133 @@ function renderGallery() {
 }
 
 addImageBtn.addEventListener('click', () => {
-    imageUploadForm.style.display = 'block';
-    imageUrlInput.focus();
+    uploadArea.style.display = 'block';
+    selectedFiles = [];
+    previewContainer.innerHTML = '';
+    progressFill.style.width = '0%';
 });
 
-cancelImageBtn.addEventListener('click', () => {
-    imageUploadForm.style.display = 'none';
-    imageUrlInput.value = '';
-    imageTitleInput.value = '';
+selectFilesBtn.addEventListener('click', () => {
+    imageFileInput.click();
 });
 
-imageUploadForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const url = imageUrlInput.value.trim();
-    const title = imageTitleInput.value.trim();
-    if (url && title) {
-        DataManager.addImage(url, title);
-        renderGallery();
-        imageUploadForm.style.display = 'none';
-        imageUrlInput.value = '';
-        imageTitleInput.value = '';
-    } else {
-        alert('Bitte geben Sie sowohl eine URL als auch einen Titel ein.');
-    }
+cancelUploadBtn.addEventListener('click', () => {
+    uploadArea.style.display = 'none';
+    imageFileInput.value = '';
+    selectedFiles = [];
+    previewContainer.innerHTML = '';
+    progressFill.style.width = '0%';
+    uploadProgress.style.display = 'none';
 });
 
-batchUploadBtn.addEventListener('click', () => {
-    batchUploadForm.style.display = 'block';
-    batchInput.focus();
+imageFileInput.addEventListener('change', (e) => {
+    selectedFiles = Array.from(e.target.files);
+    displayPreviews();
 });
 
-cancelBatchBtn.addEventListener('click', () => {
-    batchUploadForm.style.display = 'none';
-    batchInput.value = '';
-});
-
-batchUploadForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const lines = batchInput.value.trim().split('\n').filter(line => line.trim());
-    const images = [];
-    let errorCount = 0;
-
-    lines.forEach(line => {
-        const parts = line.split('|');
-        if (parts.length === 2) {
-            const url = parts[0].trim();
-            const title = parts[1].trim();
-            if (url && title) {
-                images.push({ url, title });
-            } else {
-                errorCount++;
-            }
-        } else {
-            errorCount++;
-        }
+function displayPreviews() {
+    previewContainer.innerHTML = '';
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `
+                <img src="${e.target.result}" alt="Preview">
+                <button class="remove-preview" type="button" data-index="${index}">✕</button>
+            `;
+            previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
     });
 
-    if (images.length > 0) {
-        DataManager.addImages(images);
-        renderGallery();
-        batchUploadForm.style.display = 'none';
-        batchInput.value = '';
-        alert(`✅ ${images.length} Bilder hinzugefügt! ${errorCount > 0 ? `(${errorCount} fehlerhafte Zeilen übersprungen)` : ''}`);
-    } else {
-        alert('❌ Keine gültigen Bilder gefunden. Format: URL|Titel (getrennt durch Pipe)');
+    setTimeout(() => {
+        document.querySelectorAll('.remove-preview').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const index = parseInt(btn.dataset.index);
+                selectedFiles.splice(index, 1);
+                displayPreviews();
+            });
+        });
+    }, 100);
+}
+
+async function uploadImages() {
+    if (selectedFiles.length === 0) {
+        alert('Bitte wählen Sie mindestens ein Bild aus.');
+        return;
+    }
+
+    uploadProgress.style.display = 'block';
+    const imagesToAdd = [];
+    let uploaded = 0;
+
+    for (const file of selectedFiles) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            imagesToAdd.push({
+                url: reader.result,
+                title: file.name.replace(/\.[^/.]+$/, '')
+            });
+            uploaded++;
+            const percent = Math.round((uploaded / selectedFiles.length) * 100);
+            progressFill.style.width = percent + '%';
+            progressText.textContent = `Laden... ${percent}%`;
+
+            if (uploaded === selectedFiles.length) {
+                DataManager.addImages(imagesToAdd);
+                renderGallery();
+                uploadArea.style.display = 'none';
+                imageFileInput.value = '';
+                selectedFiles = [];
+                previewContainer.innerHTML = '';
+                progressFill.style.width = '0%';
+                uploadProgress.style.display = 'none';
+                alert(`✅ ${imagesToAdd.length} Bild(er) erfolgreich hinzugefügt!`);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+previewContainer.addEventListener('dblclick', (e) => {
+    if (selectedFiles.length > 0) {
+        uploadImages();
     }
 });
+
+previewContainer.addEventListener('touchend', (e) => {
+    if (e.target.closest('.remove-preview') === null && selectedFiles.length > 0) {
+        const touch = e.changedTouches[e.changedTouches.length - 1];
+        const endTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (endTarget.closest('.preview-item') && selectedFiles.length > 0) {
+            uploadImages();
+        }
+    }
+});
+
+const uploadButton = document.createElement('button');
+uploadButton.type = 'button';
+uploadButton.className = 'save-button';
+uploadButton.textContent = '✅ Bilder hochladen';
+uploadButton.style.width = '100%';
+uploadButton.style.marginTop = '1rem';
+uploadButton.addEventListener('click', uploadImages);
+
+previewContainer.addEventListener('DOMNodeInserted', () => {
+    setTimeout(() => {
+        if (!previewContainer.nextElementSibling || !previewContainer.nextElementSibling.classList.contains('save-button')) {
+            previewContainer.parentNode.insertBefore(uploadButton.cloneNode(true), previewContainer.nextSibling);
+            previewContainer.parentNode.querySelector('.save-button:not(.original)').addEventListener('click', uploadImages);
+        }
+    }, 100);
+});
+
+// Add upload button to upload area
+const uploadButtonClone = uploadButton.cloneNode(true);
+uploadButtonClone.addEventListener('click', uploadImages);
+uploadArea.querySelector('.upload-container').appendChild(uploadButtonClone);
 
 function renderNotes() {
     const notes = DataManager.getNotes();
@@ -216,7 +286,14 @@ function renderNotes() {
     notes.forEach((note, index) => {
         const card = document.createElement('div');
         card.className = 'note-card';
-        card.innerHTML = `<h4>${note.title}</h4><p>${note.content}</p><div class="note-actions"><button class="note-edit-btn" data-index="${index}">✏️</button><button class="note-delete-btn" data-index="${index}">🗑️</button></div>`;
+        card.innerHTML = `
+            <h4>${note.title}</h4>
+            <p>${note.content}</p>
+            <div class="note-actions">
+                <button class="note-edit-btn" data-index="${index}" type="button">✏️</button>
+                <button class="note-delete-btn" data-index="${index}" type="button">🗑️</button>
+            </div>
+        `;
         notesContainer.appendChild(card);
     });
 
@@ -294,8 +371,7 @@ window.addEventListener('load', () => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         if (textEditForm.style.display === 'block') cancelTextBtn.click();
-        if (imageUploadForm.style.display === 'block') cancelImageBtn.click();
-        if (batchUploadForm.style.display === 'block') cancelBatchBtn.click();
+        if (uploadArea.style.display === 'block') cancelUploadBtn.click();
         if (noteForm.style.display === 'block') cancelNoteBtn.click();
     }
 });
