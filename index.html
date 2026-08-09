@@ -42,7 +42,6 @@
                 <div id="textDisplay" class="text-display">
                     <h3>Willkommen zu unseren gemeinsamen Erinnerungen!</h3>
                     <p>Dies ist unser persönlicher Platz, an dem wir unsere liebsten Momente, gemeinsamen Abenteuer und wertvollen Erinnerungen festhalten können.</p>
-                    <p>Hier können wir unsere Geschichte erzählen - die Momente, die uns verbinden, die Erlebnisse, die wir teilen, und die Liebe, die wir füreinander haben.</p>
                 </div>
                 <form id="textEditForm" class="text-edit-form" style="display: none;">
                     <textarea id="textInput" class="text-input" placeholder="Erzählen Sie unsere Geschichte..." rows="10"></textarea>
@@ -55,8 +54,11 @@
 
             <section class="section images-section">
                 <div class="section-header">
-                    <h2>🎬 Unsere Erinnerungen (Bilder & Videos)</h2>
-                    <button id="addMediaBtn" class="edit-button">📱 Bilder & Videos hochladen</button>
+                    <h2>🎬 Unsere Erinnerungen</h2>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button id="addMediaBtn" class="edit-button">📱 Hochladen</button>
+                        <span class="storage-info" id="storageInfo">Speicher: 0/50MB</span>
+                    </div>
                 </div>
                 
                 <div id="galleryContainer" class="gallery">
@@ -67,30 +69,14 @@
                             <button class="delete-media-btn" data-index="0" type="button">🗑️</button>
                         </div>
                     </div>
-                    <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Erinnerung 2">
-                        <div class="image-info">
-                            <p>Erinnerung 2</p>
-                            <button class="delete-media-btn" data-index="1" type="button">🗑️</button>
-                        </div>
-                    </div>
-                    <div class="gallery-item">
-                        <img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Erinnerung 3">
-                        <div class="image-info">
-                            <p>Erinnerung 3</p>
-                            <button class="delete-media-btn" data-index="2" type="button">🗑️</button>
-                        </div>
-                    </div>
                 </div>
 
                 <div id="uploadArea" class="upload-area-hidden" style="display: none;">
                     <input type="file" id="mediaFileInput" accept="image/*,video/*" multiple style="display: none;">
                     <div class="upload-container">
-                        <div class="upload-hint-box">
-                            <p class="upload-hint">📸 🎥 Wähle Bilder oder Videos von deinem Handy oder Computer</p>
-                            <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder & Videos auswählen</button>
-                            <button type="button" id="cancelUploadBtn" class="cancel-button">Abbrechen</button>
-                        </div>
+                        <p class="upload-hint">📸 🎥 Max 50MB gesamt | Max 5MB pro Datei</p>
+                        <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder & Videos auswählen</button>
+                        <button type="button" id="cancelUploadBtn" class="cancel-button">Abbrechen</button>
                         <div id="previewContainer" class="preview-container"></div>
                         <div id="uploadProgress" class="upload-progress" style="display: none;">
                             <p id="progressText">Laden...</p>
@@ -105,7 +91,7 @@
             <section class="section notes-section">
                 <div class="section-header">
                     <h2>💝 Besondere Momente</h2>
-                    <button id="addNoteBtn" class="edit-button">+ Moment hinzufügen</button>
+                    <button id="addNoteBtn" class="edit-button">+ Moment</button>
                 </div>
                 <div id="notesContainer" class="notes-container">
                     <div class="note-card">
@@ -118,8 +104,8 @@
                     </div>
                 </div>
                 <form id="noteForm" class="note-form" style="display: none;">
-                    <input type="text" id="noteTitleInput" placeholder="Moment-Titel" class="note-title-input" required>
-                    <textarea id="noteContentInput" class="note-content-input" placeholder="Beschreiben Sie diesen besonderen Moment..." rows="5" required></textarea>
+                    <input type="text" id="noteTitleInput" placeholder="Titel" class="note-title-input" required>
+                    <textarea id="noteContentInput" class="note-content-input" placeholder="Beschreibung..." rows="5" required></textarea>
                     <div class="button-group">
                         <button type="submit" class="save-button">Speichern</button>
                         <button type="button" id="cancelNoteBtn" class="cancel-button">Abbrechen</button>
@@ -129,7 +115,7 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 Leo & Carla - Unsere gemeinsamen Erinnerungen</p>
+            <p>&copy; 2024 Leo & Carla</p>
         </footer>
     </div>
 
