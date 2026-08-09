@@ -55,8 +55,8 @@
 
             <section class="section images-section">
                 <div class="section-header">
-                    <h2>🖼️ Unsere Erinnerungen</h2>
-                    <button id="addImageBtn" class="edit-button">📱 Bilder hochladen</button>
+                    <h2>🎬 Unsere Erinnerungen (Bilder & Videos)</h2>
+                    <button id="addMediaBtn" class="edit-button">📱 Bilder & Videos hochladen</button>
                 </div>
                 
                 <div id="galleryContainer" class="gallery">
@@ -64,31 +64,31 @@
                         <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop" alt="Erinnerung 1">
                         <div class="image-info">
                             <p>Erinnerung 1</p>
-                            <button class="delete-image-btn" data-index="0" type="button">🗑️</button>
+                            <button class="delete-media-btn" data-index="0" type="button">🗑️</button>
                         </div>
                     </div>
                     <div class="gallery-item">
                         <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=500&fit=crop" alt="Erinnerung 2">
                         <div class="image-info">
                             <p>Erinnerung 2</p>
-                            <button class="delete-image-btn" data-index="1" type="button">🗑️</button>
+                            <button class="delete-media-btn" data-index="1" type="button">🗑️</button>
                         </div>
                     </div>
                     <div class="gallery-item">
                         <img src="https://images.unsplash.com/photo-1495954484750-af469f1357be?w=500&h=500&fit=crop" alt="Erinnerung 3">
                         <div class="image-info">
                             <p>Erinnerung 3</p>
-                            <button class="delete-image-btn" data-index="2" type="button">🗑️</button>
+                            <button class="delete-media-btn" data-index="2" type="button">🗑️</button>
                         </div>
                     </div>
                 </div>
 
                 <div id="uploadArea" class="upload-area-hidden" style="display: none;">
-                    <input type="file" id="imageFileInput" accept="image/*" multiple style="display: none;">
+                    <input type="file" id="mediaFileInput" accept="image/*,video/*" multiple style="display: none;">
                     <div class="upload-container">
                         <div class="upload-hint-box">
-                            <p class="upload-hint">📸 Wähle Bilder von deinem Handy oder Computer</p>
-                            <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder auswählen</button>
+                            <p class="upload-hint">📸 🎥 Wähle Bilder oder Videos von deinem Handy oder Computer</p>
+                            <button type="button" id="selectFilesBtn" class="upload-file-btn">Bilder & Videos auswählen</button>
                             <button type="button" id="cancelUploadBtn" class="cancel-button">Abbrechen</button>
                         </div>
                         <div id="previewContainer" class="preview-container"></div>
